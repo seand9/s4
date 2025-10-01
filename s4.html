@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>s4</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 700px; margin: 2rem auto; padding: 1rem; }
+    textarea { width: 100%; min-height: 300px; margin-bottom: 1rem; }
+    button { padding: 0.6rem 1rem; font-size: 1rem; }
+    #response { margin-top: 1.5rem; padding: 1rem; background: #f3f6fb; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>s4</h1>
+  
+  <label for="apiKey">API Key (local use only!)</label><br>
+  <input type="password" id="apiKey" style="width:100%; margin-bottom:1rem;" />
+
+  <label for="prompt">Enter your prompt:</label>
+  <textarea id="prompt"></textarea>
+
+  <button id="sendBtn">Send</button>
+
+  <div id="response"></div>
+
+  <script>
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+      const apiKey = document.getElementById('apiKey').value.trim();
+      const prompt = document.getElementById('prompt').value.trim();
+      const output = document.getElementById('response');
+      output.textContent = "Loading...";
+
+      try {
+          const res = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.choices && data.choices.length > 0) {
+          output.textContent = data.choices[0].message.content;
+        } else {
+          output.textContent = "No response: " + JSON.stringify(data, null, 2);
+        }
+      } catch (err) {
+        output.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
